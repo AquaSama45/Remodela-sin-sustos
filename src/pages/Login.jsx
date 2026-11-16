@@ -35,7 +35,7 @@ export default function Login() {
         textAlign: 'center'
       }}>
         <div style={{ fontSize: '32px', marginBottom: '8px' }}></div>
-        <h2 style={{ marginTop: 0, marginBottom: '6px' }}>Login (en construcción)</h2>
+        <h2 style={{ marginTop: 0, marginBottom: '6px' }}>Login (en construcción  )</h2>
         <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '24px' }}>
           Remodela sin Sustos ~ Mini Beta
         </p>

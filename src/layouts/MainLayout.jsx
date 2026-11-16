@@ -10,6 +10,9 @@ export default function MainLayout() {
           <NavLink to="/" end>
             Dashboard
           </NavLink>
+          <NavLink to="/campo">
+            👷‍♂️ Vista de Campo (Móvil)
+          </NavLink>
           <NavLink to="/login">
             Iniciar Sesión
           </NavLink>

@@ -32,33 +32,29 @@ export default function Dashboard() {
         />
       </div>
 
-      <div style={{
-        marginTop: '24px',
-        background: '#ffffff',
-        padding: '20px',
-        borderRadius: '10px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-        border: '1px solid #e2e8f0'
-      }}>
-        <h3 style={{ marginTop: 0, color: '#1e293b' }}>Accesos rápidos</h3>
-        <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '16px' }}>
-          Puedes probar la navegación al login desde aquí o desde el menú lateral:
+      <div className="mt-6 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <h3 className="text-lg font-bold text-slate-900 mb-2">Accesos rápidos de prueba</h3>
+        <p className="text-slate-600 text-sm mb-4">
+          Prueba las pantallas desarrolladas hasta el momento:
         </p>
-        <Link
-          to="/login"
-          style={{
-            display: 'inline-block',
-            background: '#2563eb',
-            color: '#ffffff',
-            padding: '10px 18px',
-            borderRadius: '8px',
-            textDecoration: 'none',
-            fontWeight: '500',
-            fontSize: '14px'
-          }}
-        >
-          Ir a Iniciar Sesión
-        </Link>
+
+        <div className="flex flex-wrap gap-3">
+          <Link
+            to="/campo"
+            className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm"
+          >
+            <span>👷‍♂️</span>
+            <span>Abrir Vista de Campo (/campo)</span>
+          </Link>
+
+          <Link
+            to="/login"
+            className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm"
+          >
+            <span>🔑</span>
+            <span>Ir a Iniciar Sesión (/login)</span>
+          </Link>
+        </div>
       </div>
     </div>
   )
