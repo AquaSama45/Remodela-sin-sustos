@@ -1,4 +1,6 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from './auth/AuthContext'
+import RequireRole from './auth/RequireRole'
 import MainLayout from './layouts/MainLayout'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -7,18 +9,42 @@ import NotFound from './pages/NotFound'
 
 export default function App() {
   return (
-    <Routes>
-      {/* Fuera del layout de escritorio: pantalla completa ...*/}
-      <Route path="/login" element={<Login />} />
-      <Route path="/campo" element={<Campo />} />
-      <Route path="/campo/*" element={<Campo />} />
+    <AuthProvider>
+      <Routes>
+        {/* Ruta pública */}
+        <Route path="/login" element={<Login />} />
 
-      {/* Dentro del layout principal (Coordinación / Escritorio) */}
-      <Route element={<MainLayout />}>
-        <Route path="/" element={<Dashboard />} />
-      </Route>
+        {/* Ruta protegida: Vista de Campo (Contratistas y Coordinación) */}
+        <Route
+          path="/campo"
+          element={
+            <RequireRole rolesPermitidos={['contratista', 'coordinador']}>
+              <Campo />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/campo/*"
+          element={
+            <RequireRole rolesPermitidos={['contratista', 'coordinador']}>
+              <Campo />
+            </RequireRole>
+          }
+        />
 
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        {/* Rutas protegidas: Escritorio / Coordinación */}
+        <Route
+          element={
+            <RequireRole rolesPermitidos={['coordinador', 'auxiliar', 'gerencia']}>
+              <MainLayout />
+            </RequireRole>
+          }
+        >
+          <Route path="/" element={<Dashboard />} />
+        </Route>
+
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </AuthProvider>
   )
 }
