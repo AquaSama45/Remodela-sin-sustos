@@ -3,15 +3,12 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import {
   AlertTriangle,
-  CheckCircle2,
-  Clock,
   Building,
-  PlusCircle,
-  FileSpreadsheet,
   DollarSign,
   TrendingUp,
   ChevronRight,
   HardHat,
+  ArrowRight,
 } from 'lucide-react'
 
 // Datos del caso ancla (Obra Clara S.A.S.)
@@ -136,17 +133,26 @@ export default function Dashboard() {
       {/* Lista de Proyectos Activos */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="font-bold text-slate-900 text-base">Obras en Supervisión</h2>
+          <div>
+            <h2 className="font-bold text-slate-900 text-base">Obras en Supervisión</h2>
+            <p className="text-xs text-slate-400">Haz clic en cualquier proyecto para gestionar su alcance oficial y cotizaciones</p>
+          </div>
           <span className="text-xs text-slate-400 font-medium">Actualizado al último reporte</span>
         </div>
 
         <div className="divide-y divide-slate-100">
           {proyectos.map((p) => (
-            <div key={p.id} className="p-5 hover:bg-slate-50/70 transition-colors">
+            <Link
+              key={p.id}
+              to={`/proyectos/${p.id}`}
+              className="block p-5 hover:bg-slate-50 transition-colors group"
+            >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-slate-900 text-sm">{p.nombre}</span>
+                    <span className="font-bold text-slate-900 text-sm group-hover:text-indigo-600 transition-colors">
+                      {p.nombre}
+                    </span>
                     {p.alerta && (
                       <span className="inline-flex items-center gap-1 bg-rose-100 text-rose-700 text-[11px] font-bold px-2 py-0.5 rounded-full border border-rose-200">
                         <AlertTriangle className="w-3 h-3" />
@@ -181,9 +187,11 @@ export default function Dashboard() {
                       {formatearDinero(p.costoReal)} / {formatearDinero(p.presupuesto)}
                     </div>
                   </div>
+
+                  <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-indigo-600 transition-colors" />
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
