@@ -33,8 +33,9 @@ const PARTIDAS_SUGERIDAS = {
 }
 
 export default function AlcanceForm({ proyecto, onGuardarOficial }) {
-  const DRAFT_KEY = `draft-alcance-${proyecto.id}`
-  const OFFICIAL_KEY = `oficial-alcance-${proyecto.id}`
+  const proyId = proyecto?.id || 'proy-laureles'
+  const DRAFT_KEY = `draft-alcance-${proyId}`
+  const OFFICIAL_KEY = `oficial-alcance-${proyId}`
 
   // 1. Verificar si ya existe un alcance oficial sellado
   const [esOficial, setEsOficial] = useState(() => {

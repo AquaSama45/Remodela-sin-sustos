@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { KeyRound, HardHat, UserCheck, ShieldAlert, Building2 } from 'lucide-react'
@@ -9,11 +9,16 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  // Si ya tiene sesión activa, redirigir según su rol
-  if (isAuthenticated) {
-    if (rol === 'contratista') navigate('/campo', { replace: true })
-    else navigate('/', { replace: true })
-  }
+  // Redirigir de forma segura en useEffect (NO durante el render)
+  useEffect(() => {
+    if (isAuthenticated) {
+      if (rol === 'contratista') {
+        navigate('/campo', { replace: true })
+      } else {
+        navigate('/', { replace: true })
+      }
+    }
+  }, [isAuthenticated, rol, navigate])
 
   const handleLoginSubmit = (e) => {
     e.preventDefault()
