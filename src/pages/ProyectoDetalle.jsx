@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { PROYECTOS_INICIALES } from './Dashboard'
 import AlcanceForm from '../features/proyectos/AlcanceForm'
+import ComparadorCotizaciones from '../features/cotizaciones/ComparadorCotizaciones'
+import HitosPagoPanel from '../features/hitos/HitosPagoPanel'
 import {
   Building2,
   ArrowLeft,
@@ -10,22 +12,21 @@ import {
   TrendingUp,
   DollarSign,
   AlertTriangle,
-  Lock,
 } from 'lucide-react'
 
 export default function ProyectoDetalle() {
   const { id } = useParams()
   const proyecto = PROYECTOS_INICIALES.find((p) => p.id === id) || PROYECTOS_INICIALES[0]
 
-  const [tabActiva, setTabActiva] = useState('alcance')
+  const [tabActiva, setTabActiva] = useState('cotizaciones')
 
   const formatearDinero = (monto) =>
     new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(monto)
 
   return (
     <div className="space-y-6 max-w-5xl">
-      {/* Botón de regreso y encabezado */}
-      <div>
+      {/* Botón de regreso y encabezado (OCULTO EN IMPRESIÓN) */}
+      <div className="no-print">
         <Link
           to="/"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-indigo-600 transition-colors mb-2"
@@ -57,15 +58,16 @@ export default function ProyectoDetalle() {
         </div>
       </div>
 
-      {/* Barra de pestañas */}
-      <div className="border-b border-slate-200">
+      {/* Barra de pestañas (OCULTO EN IMPRESIÓN) */}
+      <div className="border-b border-slate-200 no-print">
         <nav className="flex space-x-6">
           <button
             onClick={() => setTabActiva('alcance')}
-            className={`pb-3 text-xs font-bold flex items-center gap-2 border-b-2 transition-all ${tabActiva === 'alcance'
+            className={`pb-3 text-xs font-bold flex items-center gap-2 border-b-2 transition-all ${
+              tabActiva === 'alcance'
                 ? 'border-indigo-600 text-indigo-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
+            }`}
           >
             <Layers className="w-4 h-4" />
             <span>1. Alcance Oficial (US-01)</span>
@@ -73,10 +75,11 @@ export default function ProyectoDetalle() {
 
           <button
             onClick={() => setTabActiva('cotizaciones')}
-            className={`pb-3 text-xs font-bold flex items-center gap-2 border-b-2 transition-all ${tabActiva === 'cotizaciones'
+            className={`pb-3 text-xs font-bold flex items-center gap-2 border-b-2 transition-all ${
+              tabActiva === 'cotizaciones'
                 ? 'border-indigo-600 text-indigo-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
+            }`}
           >
             <FileSpreadsheet className="w-4 h-4" />
             <span>2. Cotizaciones y Acuerdo (US-03/04)</span>
@@ -84,10 +87,11 @@ export default function ProyectoDetalle() {
 
           <button
             onClick={() => setTabActiva('avance')}
-            className={`pb-3 text-xs font-bold flex items-center gap-2 border-b-2 transition-all ${tabActiva === 'avance'
+            className={`pb-3 text-xs font-bold flex items-center gap-2 border-b-2 transition-all ${
+              tabActiva === 'avance'
                 ? 'border-indigo-600 text-indigo-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
+            }`}
           >
             <TrendingUp className="w-4 h-4" />
             <span>3. Avance de Obra ({proyecto.avance}%)</span>
@@ -95,10 +99,11 @@ export default function ProyectoDetalle() {
 
           <button
             onClick={() => setTabActiva('pagos')}
-            className={`pb-3 text-xs font-bold flex items-center gap-2 border-b-2 transition-all ${tabActiva === 'pagos'
+            className={`pb-3 text-xs font-bold flex items-center gap-2 border-b-2 transition-all ${
+              tabActiva === 'pagos'
                 ? 'border-indigo-600 text-indigo-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
+            }`}
           >
             <DollarSign className="w-4 h-4" />
             <span>4. Hitos y Pagos (US-07)</span>
@@ -110,16 +115,7 @@ export default function ProyectoDetalle() {
       <div>
         {tabActiva === 'alcance' && <AlcanceForm proyecto={proyecto} />}
 
-        {tabActiva === 'cotizaciones' && (
-          <div className="bg-white p-8 rounded-xl border border-slate-200 text-center space-y-3">
-            <FileSpreadsheet className="w-10 h-10 text-indigo-500 mx-auto" />
-            <h3 className="text-base font-bold text-slate-900">Módulo de Comparación de Cotizaciones</h3>
-            <p className="text-xs text-slate-500 max-w-md mx-auto">
-              Aquí se compararán lado a lado las propuestas recibidas de los contratistas sobre la base del alcance oficial
-              (US-03) y se generará el Acuerdo Formal (US-04).
-            </p>
-          </div>
-        )}
+        {tabActiva === 'cotizaciones' && <ComparadorCotizaciones proyecto={proyecto} />}
 
         {tabActiva === 'avance' && (
           <div className="bg-white p-8 rounded-xl border border-slate-200 text-center space-y-3">
@@ -132,15 +128,7 @@ export default function ProyectoDetalle() {
           </div>
         )}
 
-        {tabActiva === 'pagos' && (
-          <div className="bg-white p-8 rounded-xl border border-slate-200 text-center space-y-3">
-            <DollarSign className="w-10 h-10 text-cyan-500 mx-auto" />
-            <h3 className="text-base font-bold text-slate-900">Control de Hitos y Desembolsos</h3>
-            <p className="text-xs text-slate-500 max-w-md mx-auto">
-              Libera pagos contra hitos completados y comprobados con el avance de obra (US-07), evitando pagos duplicados.
-            </p>
-          </div>
-        )}
+        {tabActiva === 'pagos' && <HitosPagoPanel proyecto={proyecto} />}
       </div>
     </div>
   )

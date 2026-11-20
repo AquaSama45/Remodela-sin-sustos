@@ -2,13 +2,75 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  box-sizing: border-box;
+@layer utilities {
+  .font-serif-schoolbook {
+    font-family: "Century Schoolbook", "New Century Schoolbook", "TeX Gyre Schola", Georgia, serif !important;
+  }
+}
+
+/* Aplicar Century Schoolbook a todos los encabezados y documentos formales */
+h1, h2, h3, h4, h5, h6,
+.font-serif,
+.titulo-formal {
+  font-family: "Century Schoolbook", "New Century Schoolbook", "TeX Gyre Schola", Georgia, serif;
+  letter-spacing: -0.015em;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: "Century Schoolbook", "New Century Schoolbook", Georgia, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
   background-color: #f8fafc;
   color: #0f172a;
+}
+
+/* ========================================================
+   ESTILOS DE IMPRESIÓN PROFESIONAL (PDF / PAPEL)
+   ======================================================== */
+@media print {
+  /* Ocultar barra lateral, botones y elementos no imprimibles */
+  .sidebar,
+  header,
+  nav,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  /* El contenido ocupa el 100% de la página sin márgenes de app */
+  body, .layout, .content, main {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    box-shadow: none !important;
+  }
+
+  /* Ajustar documento imprimible */
+  .hoja-imprimible {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 8mm 12mm !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    page-break-after: avoid !important;
+  }
+
+  /* Compactar espaciados en impresión para que quepa en 1 hoja */
+  .hoja-imprimible > * {
+    margin-bottom: 0.75rem !important;
+  }
+
+  /* Forzar que las tablas no se corten mal */
+  table {
+    page-break-inside: auto;
+  }
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+  thead {
+    display: table-header-group;
+  }
 }
