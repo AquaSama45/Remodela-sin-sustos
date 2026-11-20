@@ -14,11 +14,12 @@ import * as acuerdos from '../controllers/acuerdos.controller.js'
 import { avanceSchema, pagoSchema, retenerSchema, cambioAlcanceSchema, umbralSchema } from '../schemas/obra.schema.js'
 import * as obra from '../controllers/obra.controller.js'
 import * as notificaciones from '../controllers/notificaciones.controller.js'
+import { salud } from '../controllers/salud.controller.js'
 
 export const router = Router()
 
 // Pública: monitoreo de disponibilidad (RNF-04)
-router.get('/health', (_req, res) => res.json({ estado: 'ok', hora: new Date().toISOString() }))
+router.get('/health', salud)
 
 // Todo lo que sigue exige sesión (RNF-03)
 router.use(autenticacion)
