@@ -202,6 +202,7 @@ async function main() {
       { proyecto_id: PROY.laureles, contratista_id: CON.mateo },
       { proyecto_id: PROY.sabaneta, contratista_id: CON.gustavo },
       { proyecto_id: PROY.belen, contratista_id: CON.mateo },
+      { proyecto_id: PROY.laureles, contratista_id: CON.gustavo },
     ],
     "proyecto_id,contratista_id",
   );
