@@ -1,14 +1,13 @@
 // Prueba rápida de la API con un usuario demo:
-//   node --env-file=.env scripts/probar-api.mjs diana.cardona@obraclara.test
-// Inicia sesión en Supabase Auth y llama a GET /api/me con el token.
+//   node --env-file=.env scripts/probar-api.mjs <email> [ruta] [METODO]
+// Ej: node --env-file=.env scripts/probar-api.mjs diana.cardona@obraclara.test /proyectos
 import { createClient } from '@supabase/supabase-js'
 
-const email = process.argv[2]
-const ruta = process.argv[3] ?? '/me'
+const [email, ruta = '/me', metodo = 'GET'] = process.argv.slice(2)
 const base = `http://localhost:${process.env.API_PORT ?? 3001}/api`
 
 if (!email) {
-  console.error('Uso: node --env-file=.env scripts/probar-api.mjs <email> [ruta]')
+  console.error('Uso: node --env-file=.env scripts/probar-api.mjs <email> [ruta] [METODO]')
   process.exit(1)
 }
 
@@ -20,7 +19,8 @@ if (error) {
 }
 
 const respuesta = await fetch(base + ruta, {
+  method: metodo.toUpperCase(),
   headers: { Authorization: `Bearer ${data.session.access_token}` },
 })
-console.log(`GET ${ruta} → ${respuesta.status}`)
+console.log(`${metodo.toUpperCase()} ${ruta} → ${respuesta.status}`)
 console.log(JSON.stringify(await respuesta.json(), null, 2))
