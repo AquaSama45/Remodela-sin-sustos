@@ -51,7 +51,7 @@ export function acuerdoADto(a) {
     responsabilidades: a.responsabilidades,
     alcance: a.alcance_acordado,
     vigente: a.vigente,
-    contratista: a.cotizaciones?.contratistas?.nombre ?? null,
+    contratista: a.contratistas?.nombre ?? null,
     tiempoDias: a.cotizaciones?.tiempo_ejecucion_dias ?? null,
     // Misma forma que usa HitosPagoPanel
     hitos: (a.hitos_de_pago ?? []).map((h) => ({

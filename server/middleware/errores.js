@@ -21,6 +21,10 @@ const MENSAJE_POR_RESTRICCION = {
   monto_distinto_justificado: 'Pagar un monto distinto al pactado exige una justificación',
   pago_completo: 'Para marcar el hito como pagado se necesitan el monto y la fecha de pago',
   historial_cambios_detalle_justificacion_check: 'El cambio de alcance exige una justificación',
+  hitos_propuestos_completos: 'Los hitos de pago propuestos deben sumar 100%',
+  pago_con_referencia: 'Ingresa la referencia bancaria del comprobante',
+  reportes_avance_porcentaje_completado_check: 'El avance debe estar entre 0% y 100%',
+  reportes_avance_descripcion_check: 'Describe el trabajo ejecutado',
 }
 
 export function manejarErrores(err, _req, res, _next) {

@@ -11,6 +11,8 @@ import * as portafolio from '../controllers/portafolio.controller.js'
 import * as alcance from '../controllers/alcance.controller.js'
 import * as cotizaciones from '../controllers/cotizaciones.controller.js'
 import * as acuerdos from '../controllers/acuerdos.controller.js'
+import { avanceSchema, pagoSchema, retenerSchema, cambioAlcanceSchema, umbralSchema } from '../schemas/obra.schema.js'
+import * as obra from '../controllers/obra.controller.js'
 
 export const router = Router()
 
@@ -60,3 +62,28 @@ router.post('/cotizaciones/:id/rechazar', permitirRoles('coordinador', 'auxiliar
 // UC4 — Generar y registrar acuerdo formal (RF-05). Actor: Coordinador
 router.post('/cotizaciones/:id/aceptar', permitirRoles('coordinador'), validar(aceptarSchema), acuerdos.aceptar)
 router.get('/proyectos/:id/acuerdo', acuerdos.consultarVigente)
+
+
+// UC5 — Reportar avance y costos (RF-07, RF-09). Actor: Contratista
+router.get('/proyectos/:id/avances', obra.listarAvances)
+router.post('/proyectos/:id/avances', permitirRoles('contratista'), validar(avanceSchema), obra.reportarAvance)
+
+// UC8 — Pago de hitos (RF-08). Actor: Coordinador
+router.post('/hitos/:id/aprobar', permitirRoles('coordinador'), obra.aprobarHito)
+router.post('/hitos/:id/retener', permitirRoles('coordinador'), validar(retenerSchema), obra.retenerHito)
+router.post('/hitos/:id/pagar', permitirRoles('coordinador'), validar(pagoSchema), obra.pagarHito)
+
+// UC9 — Cambio de alcance (RF-06, RNF-02). Actor: Coordinador
+router.get('/acuerdos/:id/historial', obra.historialCambios)
+router.post(
+  '/acuerdos/:id/cambios-alcance',
+  permitirRoles('coordinador'),
+  validar(cambioAlcanceSchema),
+  obra.registrarCambioAlcance,
+)
+
+// UC7 — Estado del proyecto (cliente final y demás roles con acceso)
+router.get('/proyectos/:id/estado', obra.estadoProyecto)
+
+// Umbral de desviación de la empresa (UC5 regla)
+router.put('/empresa/umbral', permitirRoles('coordinador', 'gerencia'), validar(umbralSchema), obra.ajustarUmbral)

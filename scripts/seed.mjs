@@ -36,10 +36,10 @@ const PROY = {
   belen: "40000000-0000-4000-8000-000000000003",
 };
 
-async function guardar(tabla, filas, conflicto = "id") {
+async function guardar(tabla, filas, conflicto = "id", soloSiNoExiste = false) {
   const { error } = await db
     .from(tabla)
-    .upsert(filas, { onConflict: conflicto });
+    .upsert(filas, { onConflict: conflicto, ignoreDuplicates: soloSiNoExiste });
   if (error) throw new Error(`${tabla}: ${error.message}`);
   console.log(`✔ ${tabla} (${filas.length})`);
 }
@@ -247,7 +247,7 @@ async function main() {
         ],
       },
     ],
-    "proyecto_id",
+    "proyecto_id", true
   );
 
   console.log(

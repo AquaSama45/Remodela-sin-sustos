@@ -42,7 +42,7 @@ export async function cambiarEstado(db, proyectoId, estado) {
 
 
 export async function obtener(db, proyectoId) {
-  const { data, error } = await db.from('proyectos').select('id, estado').eq('id', proyectoId).maybeSingle()
+  const { data, error } = await db.from('proyectos').select('id, nombre, direccion_inmueble, estado, clientes(nombre)').eq('id', proyectoId).maybeSingle()
   if (error) throw error
   return data
 }
