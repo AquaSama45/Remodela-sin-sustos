@@ -5,9 +5,12 @@ import * as hito from '../services/hito.service.js'
 import * as cambio from '../services/cambio.service.js'
 import * as estado from '../services/estado.service.js'
 import * as empresa from '../services/empresa.service.js'
+import { procesarCola } from '../notificaciones/correo.service.js'
 
 export async function reportarAvance(req, res) {
-  res.status(201).json(await avance.reportar(req.db, req.usuario.id, req.params.id, req.body))
+  const reporte = await avance.reportar(req.db, req.usuario.id, req.params.id, req.body)
+  if (reporte.alerta) await procesarCola() // US-06: la alerta sale en el mismo momento
+  res.status(201).json(reporte)
 }
 
 export async function listarAvances(req, res) {
@@ -27,7 +30,9 @@ export async function pagarHito(req, res) {
 }
 
 export async function registrarCambioAlcance(req, res) {
-  res.status(201).json(await cambio.registrar(req.db, req.params.id, req.body))
+  const historial = await cambio.registrar(req.db, req.params.id, req.body)
+  await procesarCola() // UC9 paso 5: notifica a las partes
+  res.status(201).json(historial)
 }
 
 export async function historialCambios(req, res) {

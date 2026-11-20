@@ -21,3 +21,9 @@ export function clienteDelUsuario(token) {
     global: { headers: { Authorization: `Bearer ${token}` } },
   })
 }
+
+// Cliente del sistema (secret key): salta RLS. SOLO para procesos internos
+// como la cola de correos; nunca se usa con datos que mande el usuario.
+export const clienteSistema = process.env.SUPABASE_SECRET_KEY
+  ? createClient(url, process.env.SUPABASE_SECRET_KEY, opciones)
+  : null

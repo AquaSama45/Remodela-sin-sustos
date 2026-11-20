@@ -13,6 +13,7 @@ import * as cotizaciones from '../controllers/cotizaciones.controller.js'
 import * as acuerdos from '../controllers/acuerdos.controller.js'
 import { avanceSchema, pagoSchema, retenerSchema, cambioAlcanceSchema, umbralSchema } from '../schemas/obra.schema.js'
 import * as obra from '../controllers/obra.controller.js'
+import * as notificaciones from '../controllers/notificaciones.controller.js'
 
 export const router = Router()
 
@@ -87,3 +88,6 @@ router.get('/proyectos/:id/estado', obra.estadoProyecto)
 
 // Umbral de desviación de la empresa (UC5 regla)
 router.put('/empresa/umbral', permitirRoles('coordinador', 'gerencia'), validar(umbralSchema), obra.ajustarUmbral)
+
+// Servicio de notificaciones (C4): reintento manual de correos pendientes
+router.post('/notificaciones/procesar', permitirRoles('coordinador'), notificaciones.procesar)
