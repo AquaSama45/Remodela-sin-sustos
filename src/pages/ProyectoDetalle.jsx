@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { PROYECTOS_INICIALES } from './Dashboard'
 import AlcanceForm from '../features/proyectos/AlcanceForm'
 import ComparadorCotizaciones from '../features/cotizaciones/ComparadorCotizaciones'
+import HitosPagoPanel from '../features/hitos/HitosPagoPanel'
 import {
   Building2,
   ArrowLeft,
@@ -127,15 +128,7 @@ export default function ProyectoDetalle() {
           </div>
         )}
 
-        {tabActiva === 'pagos' && (
-          <div className="bg-white p-8 rounded-xl border border-slate-200 text-center space-y-3">
-            <DollarSign className="w-10 h-10 text-cyan-500 mx-auto" />
-            <h3 className="text-base font-bold text-slate-900">Control de Hitos y Desembolsos</h3>
-            <p className="text-xs text-slate-500 max-w-md mx-auto">
-              Libera pagos contra hitos completados y comprobados con el avance de obra (US-07), evitando pagos duplicados.
-            </p>
-          </div>
-        )}
+        {tabActiva === 'pagos' && <HitosPagoPanel proyecto={proyecto} />}
       </div>
     </div>
   )
