@@ -285,6 +285,16 @@ void MenuContratista::nuevaVersion() {
     });
 }
 
+void MenuContratista::reportarAvanceObra() {
+    const int idAcuerdo = leerEntero("  Id del acuerdo de la obra: ");
+    const int avance = leerEntero("  Avance general de obra (1-100): ");
+    const long long costo = leerMonto("  Costo real acumulado: ");
+    intentar([&] {
+        const int id = ctx_.servicioAvance.registrarAvance(idAcuerdo, avance, costo);
+        aviso("Reporte " + std::to_string(id) + " registrado.");
+    });
+}
+
 void MenuContratista::ejecutar() {
     while (true) {
         titulo("Contratista — cotizacion (UC2)");
@@ -296,6 +306,7 @@ void MenuContratista::ejecutar() {
                      "  6. Ver que falta para enviar\n"
                      "  7. Enviar cotizacion\n"
                      "  8. Crear nueva version\n"
+                     "  9. Reportar avance y costo real (UC5)\n"
                      "  0. Volver"
                   << std::endl;
         switch (leerEntero("  Opcion: ")) {
@@ -307,6 +318,7 @@ void MenuContratista::ejecutar() {
             case 6: verFaltantes(); break;
             case 7: enviar(); break;
             case 8: nuevaVersion(); break;
+            case 9: reportarAvanceObra(); break;
             case 0: return;
             default: error("Opcion no valida.");
         }
@@ -393,12 +405,30 @@ void MenuCliente::verAcuerdo() {
     if (acuerdo->liquidado()) aviso("Acuerdo liquidado.");
 }
 
-void MenuCliente::reportarAvance() {
+void MenuCliente::verHistorialAvances() {
     const int idAcuerdo = leerEntero("  Id del acuerdo: ");
-    const int porcentaje = leerEntero("  Avance de obra (0-100): ");
     intentar([&] {
-        ctx_.servicioAcuerdo.reportarAvance(idAcuerdo, porcentaje);
-        aviso("Avance registrado. Los hitos que ya cumplen su exigencia quedan habilitados.");
+        auto reportes = ctx_.servicioAvance.historial(idAcuerdo);
+        titulo("Avances reportados del acuerdo " + std::to_string(idAcuerdo));
+        if (reportes.empty()) {
+            aviso("El contratista todavia no ha reportado avance.");
+            return;
+        }
+        std::cout << "  " << std::left << std::setw(5) << "Rep" << std::setw(9) << "Avance"
+                  << std::right << std::setw(15) << "Costo real" << std::setw(15) << "Esperado"
+                  << std::setw(15) << "Desviacion" << std::setw(10) << "%" << std::endl;
+        for (const auto* reporte : reportes) {
+            std::cout << "  " << std::left << std::setw(5) << reporte->idReporte()
+                      << std::setw(9) << (std::to_string(reporte->avanceGeneral()) + "%")
+                      << std::right << std::setw(15) << pesos(reporte->costoRealAcumulado())
+                      << std::setw(15) << pesos(reporte->costoEsperado()) << std::setw(15)
+                      << pesos(reporte->desviacionCosto()) << std::setw(9) << std::fixed
+                      << std::setprecision(1) << reporte->desviacionPorcentual() << "%";
+            if (reporte->requiereAlerta(ctx_.servicioAvance.umbral())) std::cout << "  <- alerta";
+            std::cout << std::endl;
+        }
+        aviso("Umbral de alerta vigente: " + std::to_string(
+                  static_cast<int>(ctx_.servicioAvance.umbral())) + "% (RF-09).");
     });
 }
 
@@ -420,7 +450,7 @@ void MenuCliente::ejecutar() {
                      "  2. Poner una cotizacion en revision\n"
                      "  3. Aceptar cotizacion y generar acuerdo\n"
                      "  4. Ver acuerdo y plan de pagos\n"
-                     "  5. Reportar avance de obra\n"
+                     "  5. Ver avances reportados y desviaciones\n"
                      "  6. Registrar pago de un hito\n"
                      "  0. Volver"
                   << std::endl;
@@ -429,7 +459,7 @@ void MenuCliente::ejecutar() {
             case 2: ponerEnRevision(); break;
             case 3: aceptar(); break;
             case 4: verAcuerdo(); break;
-            case 5: reportarAvance(); break;
+            case 5: verHistorialAvances(); break;
             case 6: pagarHito(); break;
             case 0: return;
             default: error("Opcion no valida.");

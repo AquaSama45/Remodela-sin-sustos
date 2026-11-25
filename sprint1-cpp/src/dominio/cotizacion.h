@@ -10,10 +10,10 @@ namespace dominio {
 
 class Alcance;
 
-// ItemCotizacion <<entity>> — RF-03: valor que el contratista pone a una partida
-class ItemCotizacion {
+// DetalleCotizacion <<entity>> — RF-03: valor que el contratista pone a una partida
+class DetalleCotizacion {
 public:
-    ItemCotizacion(std::string partida, std::string unidad, double cantidad,
+    DetalleCotizacion(std::string partida, std::string unidad, double cantidad,
                    long long valorUnitario);
 
     const std::string& partida() const;
@@ -57,7 +57,7 @@ public:
     int version() const;
     const std::string& exclusiones() const;
     const std::string& motivoRechazo() const;
-    const std::vector<ItemCotizacion>& items() const;
+    const std::vector<DetalleCotizacion>& items() const;
     const std::vector<HitoPropuesto>& hitosPropuestos() const;
 
     std::string estado() const;
@@ -69,7 +69,7 @@ public:
     int sumaPorcentajes() const;
 
     // --- Edicion: solo permitida en BORRADOR (UC2 A1) ---
-    void agregarItem(const ItemCotizacion& item);
+    void agregarItem(const DetalleCotizacion& item);
     void definirExclusiones(const std::string& texto);
     void agregarHitoPropuesto(const HitoPropuesto& hito);
 
@@ -97,7 +97,7 @@ private:
     int version_;
     std::string exclusiones_;
     std::string motivoRechazo_;
-    std::vector<ItemCotizacion> items_;
+    std::vector<DetalleCotizacion> items_;
     std::vector<HitoPropuesto> hitosPropuestos_;
     const EstadoCotizacion* estado_;
 };

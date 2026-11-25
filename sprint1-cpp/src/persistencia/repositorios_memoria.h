@@ -15,7 +15,7 @@ namespace persistencia {
 // el cambio ya queda "persistido". Contra una base de datos real ese mismo servicio
 // tendria que llamar guardar() de nuevo, y es el unico ajuste que exigiria el cambio.
 
-class ProyectosEnMemoria : public RepositorioProyectos {
+class RepositorioProyectosMemoria : public IRepositorioProyectos {
 public:
     int guardar(const dominio::Proyecto& proyecto) override;
     dominio::Proyecto* buscar(int idProyecto) override;
@@ -26,7 +26,7 @@ private:
     std::map<int, dominio::Proyecto> datos_;
 };
 
-class AlcancesEnMemoria : public RepositorioAlcances {
+class RepositorioAlcancesMemoria : public IRepositorioAlcances {
 public:
     int guardar(const dominio::Alcance& alcance) override;
     dominio::Alcance* buscar(int idAlcance) override;
@@ -37,7 +37,7 @@ private:
     std::map<int, dominio::Alcance> datos_;
 };
 
-class CotizacionesEnMemoria : public RepositorioCotizaciones {
+class RepositorioCotizacionesMemoria : public IRepositorioCotizaciones {
 public:
     int guardar(const dominio::Cotizacion& cotizacion) override;
     dominio::Cotizacion* buscar(int idCotizacion) override;
@@ -48,7 +48,7 @@ private:
     std::map<int, dominio::Cotizacion> datos_;
 };
 
-class AcuerdosEnMemoria : public RepositorioAcuerdos {
+class RepositorioAcuerdosMemoria : public IRepositorioAcuerdos {
 public:
     int guardar(const dominio::AcuerdoFormal& acuerdo) override;
     dominio::AcuerdoFormal* buscar(int idAcuerdo) override;
@@ -57,6 +57,17 @@ public:
 
 private:
     std::map<int, dominio::AcuerdoFormal> datos_;
+};
+
+class RepositorioReportesMemoria : public IRepositorioReportes {
+public:
+    int guardar(const dominio::ReporteAvance& reporte) override;
+    std::vector<const dominio::ReporteAvance*> listarPorAcuerdo(int idAcuerdo) const override;
+    const dominio::ReporteAvance* ultimoDe(int idAcuerdo) const override;
+    int siguienteId() const override;
+
+private:
+    std::map<int, dominio::ReporteAvance> datos_;
 };
 
 }  // namespace persistencia

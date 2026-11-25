@@ -11,10 +11,12 @@ struct Contexto {
     control::ServicioAlcance& servicioAlcance;
     control::ServicioCotizacion& servicioCotizacion;
     control::ServicioAcuerdo& servicioAcuerdo;
-    persistencia::RepositorioProyectos& proyectos;
-    persistencia::RepositorioAlcances& alcances;
-    persistencia::RepositorioCotizaciones& cotizaciones;
-    persistencia::RepositorioAcuerdos& acuerdos;
+    persistencia::IRepositorioProyectos& proyectos;
+    persistencia::IRepositorioAlcances& alcances;
+    persistencia::IRepositorioCotizaciones& cotizaciones;
+    persistencia::IRepositorioAcuerdos& acuerdos;
+    control::ServicioAvance& servicioAvance;
+    persistencia::IRepositorioReportes& reportes;
 };
 
 // Clases <<boundary>>.
@@ -54,6 +56,7 @@ private:
     void enviar();
     void nuevaVersion();
     void verCotizacion();
+    void reportarAvanceObra();  // UC5
 
     Contexto& ctx_;
 };
@@ -68,7 +71,7 @@ private:
     void ponerEnRevision();
     void aceptar();
     void verAcuerdo();
-    void reportarAvance();
+    void verHistorialAvances();  // US-06
     void pagarHito();
 
     Contexto& ctx_;

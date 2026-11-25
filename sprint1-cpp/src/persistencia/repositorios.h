@@ -7,6 +7,7 @@
 #include "../dominio/alcance.h"
 #include "../dominio/cotizacion.h"
 #include "../dominio/proyecto.h"
+#include "../dominio/reporte_avance.h"
 
 namespace persistencia {
 
@@ -17,39 +18,48 @@ namespace persistencia {
 // Cada interfaz expone solo lo que su agregado necesita, no un CRUD generico:
 // principio I (segregacion de interfaces).
 
-class RepositorioProyectos {
+class IRepositorioProyectos {
 public:
-    virtual ~RepositorioProyectos() = default;
+    virtual ~IRepositorioProyectos() = default;
     virtual int guardar(const dominio::Proyecto& proyecto) = 0;
     virtual dominio::Proyecto* buscar(int idProyecto) = 0;
     virtual std::vector<const dominio::Proyecto*> listar() const = 0;
     virtual int siguienteId() const = 0;
 };
 
-class RepositorioAlcances {
+class IRepositorioAlcances {
 public:
-    virtual ~RepositorioAlcances() = default;
+    virtual ~IRepositorioAlcances() = default;
     virtual int guardar(const dominio::Alcance& alcance) = 0;
     virtual dominio::Alcance* buscar(int idAlcance) = 0;
     virtual dominio::Alcance* buscarPorProyecto(int idProyecto) = 0;
     virtual int siguienteId() const = 0;
 };
 
-class RepositorioCotizaciones {
+class IRepositorioCotizaciones {
 public:
-    virtual ~RepositorioCotizaciones() = default;
+    virtual ~IRepositorioCotizaciones() = default;
     virtual int guardar(const dominio::Cotizacion& cotizacion) = 0;
     virtual dominio::Cotizacion* buscar(int idCotizacion) = 0;
     virtual std::vector<dominio::Cotizacion*> listarPorAlcance(int idAlcance) = 0;
     virtual int siguienteId() const = 0;
 };
 
-class RepositorioAcuerdos {
+class IRepositorioAcuerdos {
 public:
-    virtual ~RepositorioAcuerdos() = default;
+    virtual ~IRepositorioAcuerdos() = default;
     virtual int guardar(const dominio::AcuerdoFormal& acuerdo) = 0;
     virtual dominio::AcuerdoFormal* buscar(int idAcuerdo) = 0;
     virtual dominio::AcuerdoFormal* buscarPorCotizacion(int idCotizacion) = 0;
+    virtual int siguienteId() const = 0;
+};
+
+class IRepositorioReportes {
+public:
+    virtual ~IRepositorioReportes() = default;
+    virtual int guardar(const dominio::ReporteAvance& reporte) = 0;
+    virtual std::vector<const dominio::ReporteAvance*> listarPorAcuerdo(int idAcuerdo) const = 0;
+    virtual const dominio::ReporteAvance* ultimoDe(int idAcuerdo) const = 0;
     virtual int siguienteId() const = 0;
 };
 

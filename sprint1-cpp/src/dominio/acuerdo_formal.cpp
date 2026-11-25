@@ -9,23 +9,23 @@
 
 namespace dominio {
 
-// ----- EstadoHito: helpers y rechazos por defecto -----
+// ----- EstadoHitoPago: helpers y rechazos por defecto -----
 
-void EstadoHito::transicionar(HitoDePago& hito, const EstadoHito& nuevo) {
+void EstadoHitoPago::transicionar(HitoDePago& hito, const EstadoHitoPago& nuevo) {
     hito.estado_ = &nuevo;
 }
 
-void EstadoHito::anotarComprobante(HitoDePago& hito, const std::string& comprobante) {
+void EstadoHitoPago::anotarComprobante(HitoDePago& hito, const std::string& comprobante) {
     hito.comprobante_ = comprobante;
 }
 
-void EstadoHito::noPermitido(const std::string& operacion) const {
+void EstadoHitoPago::noPermitido(const std::string& operacion) const {
     throw ReglaDeNegocio("No se puede " + operacion + " un hito en estado " + nombre());
 }
 
-void EstadoHito::habilitar(HitoDePago&, int) const { noPermitido("habilitar"); }
+void EstadoHitoPago::habilitar(HitoDePago&, int) const { noPermitido("habilitar"); }
 
-void EstadoHito::registrarPago(HitoDePago&, const std::string&, long long) const {
+void EstadoHitoPago::registrarPago(HitoDePago&, const std::string&, long long) const {
     noPermitido("registrar el pago de");
 }
 
@@ -65,13 +65,13 @@ void Habilitado::registrarPago(HitoDePago& hito, const std::string& comprobante,
                              std::to_string(montoPagado));
     }
     anotarComprobante(hito, comprobante);
-    transicionar(hito, Pagado::instancia());
+    transicionar(hito, HitoPagado::instancia());
 }
 
 // ----- PAGADO: terminal -----
 
-const Pagado& Pagado::instancia() {
-    static const Pagado unica;
+const HitoPagado& HitoPagado::instancia() {
+    static const HitoPagado unica;
     return unica;
 }
 
@@ -184,6 +184,13 @@ long long AcuerdoFormal::totalPagado() const {
 }
 
 long long AcuerdoFormal::saldoPendiente() const { return valorTotal_ - totalPagado(); }
+
+long long AcuerdoFormal::costoEsperadoPara(int avanceGeneral) const {
+    if (avanceGeneral < 0 || avanceGeneral > 100) {
+        throw ReglaDeNegocio("El avance general debe estar entre 0 y 100");
+    }
+    return std::llround(static_cast<double>(valorTotal_) * avanceGeneral / 100.0);
+}
 
 bool AcuerdoFormal::liquidado() const {
     return std::all_of(hitos_.begin(), hitos_.end(),

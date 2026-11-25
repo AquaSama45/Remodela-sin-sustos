@@ -9,23 +9,27 @@
 #include <iostream>
 
 #include "control/servicios.h"
+#include "persistencia/notificador_consola.h"
 #include "persistencia/repositorios_memoria.h"
 #include "ui/consola.h"
 #include "ui/menus.h"
 
 int main() {
-    persistencia::ProyectosEnMemoria proyectos;
-    persistencia::AlcancesEnMemoria alcances;
-    persistencia::CotizacionesEnMemoria cotizaciones;
-    persistencia::AcuerdosEnMemoria acuerdos;
+    persistencia::RepositorioProyectosMemoria proyectos;
+    persistencia::RepositorioAlcancesMemoria alcances;
+    persistencia::RepositorioCotizacionesMemoria cotizaciones;
+    persistencia::RepositorioAcuerdosMemoria acuerdos;
+    persistencia::RepositorioReportesMemoria reportes;
+    persistencia::NotificadorConsola notificador;
 
     control::ServicioAlcance servicioAlcance(proyectos, alcances);
     control::ServicioCotizacion servicioCotizacion(cotizaciones, alcances);
     control::ServicioAcuerdo servicioAcuerdo(cotizaciones, acuerdos, alcances, proyectos);
+    control::ServicioAvance servicioAvance(acuerdos, reportes, notificador);
 
     ui::Contexto contexto{servicioAlcance, servicioCotizacion, servicioAcuerdo,
                           proyectos,       alcances,           cotizaciones,
-                          acuerdos};
+                          acuerdos,        servicioAvance,     reportes};
 
     try {
         ui::MenuPrincipal(contexto).ejecutar();

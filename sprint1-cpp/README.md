@@ -27,19 +27,20 @@ al dominio, y el dominio no conoce a nadie.
 
 | Carpeta | Estereotipo | Qué contiene | Clases |
 |---|---|---|---|
-| `src/dominio/` | `<<entity>>` | Entidades y todas las reglas de negocio | 21 |
-| `src/persistencia/` | `<<repository>>` | 4 interfaces + 4 implementaciones en memoria | 8 |
-| `src/control/` | `<<control>>` | Servicios que coordinan los casos de uso | 4 |
+| `src/dominio/` | `<<entity>>` | Entidades y todas las reglas de negocio | 22 |
+| `src/persistencia/` | `<<repository>>` | 5 interfaces, 5 implementaciones en memoria, puerto de notificación y su adaptador | 12 |
+| `src/control/` | `<<control>>` | Servicios que coordinan los casos de uso | 5 |
 | `src/ui/` | `<<boundary>>` | Menús de consola por rol | 6 |
 
 `src/main.cpp` es el punto de ensamblaje: el único lugar donde se eligen las
 implementaciones concretas.
 
-Dos comprobaciones de que la separación es real y no decorativa:
+Tres comprobaciones de que la separación es real y no decorativa:
 
 ```bash
-grep -r iostream src/dominio/     # vacío: el dominio no sabe que hay pantalla
-grep -rn "catch (const ReglaDeNegocio" src/   # un solo punto, en src/ui/menus.cpp
+grep -r iostream src/dominio/                  # vacío: el dominio no sabe que hay pantalla
+grep -rn "catch (const ReglaDeNegocio" src/    # un solo punto, en src/ui/menus.cpp
+grep -rn "EnMemoria\|Consola" src/control/     # vacío: el control no conoce implementaciones
 ```
 
 ## Casos de uso cubiertos
@@ -50,7 +51,8 @@ grep -rn "catch (const ReglaDeNegocio" src/   # un solo punto, en src/ui/menus.c
 | UC2 | Elaborar y enviar cotización | Contratista | `cotizacion.*`, `estado_cotizacion.*`, `ServicioCotizacion` |
 | UC3 | Comparar cotizaciones | Cliente | `ServicioAcuerdo::comparar` |
 | UC4 | Formalizar el acuerdo | Cliente | `acuerdo_formal.*`, `ServicioAcuerdo::aceptar` |
-| UC8 | Registrar pago de hito | Cliente | `EstadoHito`, `AcuerdoFormal::pagarHito` |
+| UC5 | Reportar avance y costos | Contratista | `reporte_avance.*`, `ServicioAvance` |
+| UC8 | Registrar pago de hito | Cliente | `EstadoHitoPago`, `AcuerdoFormal::pagarHito` |
 
 ## Patrón GoF aplicado: State
 
@@ -66,10 +68,10 @@ que permite, y agregar un estado nuevo no obliga a editar ningún `switch`.
 Los estados no tienen datos: son singletons (`Borrador::instancia()`), por eso el
 programa no usa `new` ni `delete` en ninguna parte.
 
-## La regla que da nombre al proyecto
+## Las dos reglas que dan nombre al proyecto
 
-El plan de pagos del acuerdo exige que **lo pagado nunca se adelante al avance de
-obra**, salvo el anticipo. Para un plan 40/30/30:
+**Lo pagado nunca se adelanta al avance de obra**, salvo el anticipo. Para un plan
+40/30/30:
 
 | # | Hito | % del valor | Avance de obra exigido |
 |---|---|---|---|
@@ -80,6 +82,11 @@ obra**, salvo el anticipo. Para un plan 40/30/30:
 El último hito absorbe el residuo del redondeo, así que la suma de los hitos es
 exactamente el valor del acuerdo.
 
+**El sobrecosto se avisa en el momento del reporte.** `ReporteAvance` compara el costo
+real acumulado contra `AcuerdoFormal::costoEsperadoPara(avance)` y, si la desviación
+supera el umbral de `ServicioAvance::UMBRAL_DEFECTO` (10 %, RF-09), el servicio dispara
+la alerta por `PuertoNotificacion`. Gastar menos de lo pactado no alerta.
+
 ## SOLID
 
 | | Dónde se ve |
@@ -88,4 +95,4 @@ exactamente el valor del acuerdo.
 | **O** | Patrón State: un estado nuevo es una clase nueva, sin tocar lo existente |
 | **L** | `Borrador`, `Enviada`, … son sustituibles por `EstadoCotizacion` en cualquier punto |
 | **I** | Cada interfaz `<<repository>>` expone lo que su agregado necesita, no un CRUD genérico |
-| **D** | Servicios y consola dependen de interfaces; `main.cpp` es el único que conoce las implementaciones |
+| **D** | `ServicioAvance` depende de `PuertoNotificacion`, no de `NotificadorConsola`; `main.cpp` es el único que conoce las implementaciones |

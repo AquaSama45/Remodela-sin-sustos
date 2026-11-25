@@ -14,9 +14,9 @@ class Cotizacion;
 // Jerarquia independiente de la de Cotizacion porque las operaciones son otras;
 // lo que se repite es la estructura del patron, no el codigo.
 // ---------------------------------------------------------------------------
-class EstadoHito {
+class EstadoHitoPago {
 public:
-    virtual ~EstadoHito() = default;
+    virtual ~EstadoHitoPago() = default;
 
     virtual std::string nombre() const = 0;
     virtual bool esPagado() const { return false; }
@@ -26,14 +26,14 @@ public:
                                long long montoPagado) const;
 
 protected:
-    static void transicionar(HitoDePago& hito, const EstadoHito& nuevo);
+    static void transicionar(HitoDePago& hito, const EstadoHitoPago& nuevo);
     static void anotarComprobante(HitoDePago& hito, const std::string& comprobante);
 
     [[noreturn]] void noPermitido(const std::string& operacion) const;
 };
 
 // PENDIENTE_DE_AVANCE: la obra todavia no llego al avance que exige este hito
-class PendienteDeAvance : public EstadoHito {
+class PendienteDeAvance : public EstadoHitoPago {
 public:
     static const PendienteDeAvance& instancia();
     std::string nombre() const override { return "PENDIENTE_DE_AVANCE"; }
@@ -41,7 +41,7 @@ public:
 };
 
 // HABILITADO: el avance se cumplio, el pago ya se puede registrar (UC8)
-class Habilitado : public EstadoHito {
+class Habilitado : public EstadoHitoPago {
 public:
     static const Habilitado& instancia();
     std::string nombre() const override { return "HABILITADO"; }
@@ -50,9 +50,9 @@ public:
 };
 
 // PAGADO: terminal, con comprobante registrado
-class Pagado : public EstadoHito {
+class HitoPagado : public EstadoHitoPago {
 public:
-    static const Pagado& instancia();
+    static const HitoPagado& instancia();
     std::string nombre() const override { return "PAGADO"; }
     bool esPagado() const override { return true; }
 };
@@ -79,7 +79,7 @@ public:
     void registrarPago(const std::string& comprobante, long long montoPagado);
 
 private:
-    friend class EstadoHito;
+    friend class EstadoHitoPago;
 
     int numero_;
     std::string descripcion_;
@@ -87,7 +87,7 @@ private:
     long long monto_;
     int avanceRequerido_;
     std::string comprobante_;
-    const EstadoHito* estado_;
+    const EstadoHitoPago* estado_;
 };
 
 // AcuerdoFormal <<entity>> — RF-04, UC4.
@@ -108,6 +108,10 @@ public:
 
     int avanceReportado() const;
     long long totalPagado() const;
+
+    // UC5 paso 3: el costo esperado se mide contra lo pactado, no contra una
+    // estimacion aparte. Es lo que hace comparable el costo real del contratista.
+    long long costoEsperadoPara(int avanceGeneral) const;
     long long saldoPendiente() const;
 
     // Version simple del reporte de avance (base del UC7): solo sube, nunca baja.

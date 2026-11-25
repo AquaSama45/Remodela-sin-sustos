@@ -25,9 +25,9 @@ std::vector<std::string> partidasRequeridas(const Alcance& alcance) {
 
 }  // namespace
 
-// ----- ItemCotizacion -----
+// ----- DetalleCotizacion -----
 
-ItemCotizacion::ItemCotizacion(std::string partida, std::string unidad, double cantidad,
+DetalleCotizacion::DetalleCotizacion(std::string partida, std::string unidad, double cantidad,
                                long long valorUnitario)
     : partida_(std::move(partida)),
       unidad_(std::move(unidad)),
@@ -40,12 +40,12 @@ ItemCotizacion::ItemCotizacion(std::string partida, std::string unidad, double c
     }
 }
 
-const std::string& ItemCotizacion::partida() const { return partida_; }
-const std::string& ItemCotizacion::unidad() const { return unidad_; }
-double ItemCotizacion::cantidad() const { return cantidad_; }
-long long ItemCotizacion::valorUnitario() const { return valorUnitario_; }
+const std::string& DetalleCotizacion::partida() const { return partida_; }
+const std::string& DetalleCotizacion::unidad() const { return unidad_; }
+double DetalleCotizacion::cantidad() const { return cantidad_; }
+long long DetalleCotizacion::valorUnitario() const { return valorUnitario_; }
 
-long long ItemCotizacion::subtotal() const {
+long long DetalleCotizacion::subtotal() const {
     return std::llround(cantidad_ * static_cast<double>(valorUnitario_));
 }
 
@@ -77,7 +77,7 @@ int Cotizacion::idContratista() const { return idContratista_; }
 int Cotizacion::version() const { return version_; }
 const std::string& Cotizacion::exclusiones() const { return exclusiones_; }
 const std::string& Cotizacion::motivoRechazo() const { return motivoRechazo_; }
-const std::vector<ItemCotizacion>& Cotizacion::items() const { return items_; }
+const std::vector<DetalleCotizacion>& Cotizacion::items() const { return items_; }
 const std::vector<HitoPropuesto>& Cotizacion::hitosPropuestos() const { return hitosPropuestos_; }
 
 std::string Cotizacion::estado() const { return estado_->nombre(); }
@@ -103,9 +103,9 @@ void Cotizacion::exigirEdicion() const {
     }
 }
 
-void Cotizacion::agregarItem(const ItemCotizacion& item) {
+void Cotizacion::agregarItem(const DetalleCotizacion& item) {
     exigirEdicion();
-    auto repetido = std::find_if(items_.begin(), items_.end(), [&](const ItemCotizacion& i) {
+    auto repetido = std::find_if(items_.begin(), items_.end(), [&](const DetalleCotizacion& i) {
         return i.partida() == item.partida();
     });
     if (repetido != items_.end()) {
@@ -142,7 +142,7 @@ std::vector<std::string> Cotizacion::faltantesParaEnvio(const Alcance& alcance) 
 
     // RF-03: la propuesta debe cubrir toda la estructura comun del alcance
     for (const auto& requerida : partidasRequeridas(alcance)) {
-        auto cubierta = std::find_if(items_.begin(), items_.end(), [&](const ItemCotizacion& i) {
+        auto cubierta = std::find_if(items_.begin(), items_.end(), [&](const DetalleCotizacion& i) {
             return i.partida() == requerida;
         });
         if (cubierta == items_.end()) {

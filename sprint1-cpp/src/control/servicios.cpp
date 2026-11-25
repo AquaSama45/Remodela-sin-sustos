@@ -1,6 +1,8 @@
 #include "servicios.h"
 
 #include <algorithm>
+#include <iomanip>
+#include <sstream>
 
 #include "../dominio/enums.h"
 #include "../dominio/regla_negocio.h"
@@ -13,8 +15,8 @@ using dominio::ReglaDeNegocio;
 // ServicioAlcance — UC1
 // ===========================================================================
 
-ServicioAlcance::ServicioAlcance(persistencia::RepositorioProyectos& proyectos,
-                                 persistencia::RepositorioAlcances& alcances)
+ServicioAlcance::ServicioAlcance(persistencia::IRepositorioProyectos& proyectos,
+                                 persistencia::IRepositorioAlcances& alcances)
     : proyectos_(proyectos), alcances_(alcances) {}
 
 dominio::Alcance& ServicioAlcance::exigirAlcance(int idAlcance) {
@@ -82,8 +84,8 @@ void ServicioAlcance::oficializar(int idAlcance) {
 // ServicioCotizacion — UC2
 // ===========================================================================
 
-ServicioCotizacion::ServicioCotizacion(persistencia::RepositorioCotizaciones& cotizaciones,
-                                       persistencia::RepositorioAlcances& alcances)
+ServicioCotizacion::ServicioCotizacion(persistencia::IRepositorioCotizaciones& cotizaciones,
+                                       persistencia::IRepositorioAlcances& alcances)
     : cotizaciones_(cotizaciones), alcances_(alcances) {}
 
 dominio::Cotizacion& ServicioCotizacion::exigirCotizacion(int idCotizacion) {
@@ -127,7 +129,7 @@ void ServicioCotizacion::agregarItem(int idCotizacion, const std::string& partid
                                      const std::string& unidad, double cantidad,
                                      long long valorUnitario) {
     exigirCotizacion(idCotizacion)
-        .agregarItem(dominio::ItemCotizacion(partida, unidad, cantidad, valorUnitario));
+        .agregarItem(dominio::DetalleCotizacion(partida, unidad, cantidad, valorUnitario));
 }
 
 void ServicioCotizacion::definirExclusiones(int idCotizacion, const std::string& texto) {
@@ -160,10 +162,10 @@ int ServicioCotizacion::crearNuevaVersion(int idCotizacion) {
 // ServicioAcuerdo — UC3, UC4 y UC8
 // ===========================================================================
 
-ServicioAcuerdo::ServicioAcuerdo(persistencia::RepositorioCotizaciones& cotizaciones,
-                                 persistencia::RepositorioAcuerdos& acuerdos,
-                                 persistencia::RepositorioAlcances& alcances,
-                                 persistencia::RepositorioProyectos& proyectos)
+ServicioAcuerdo::ServicioAcuerdo(persistencia::IRepositorioCotizaciones& cotizaciones,
+                                 persistencia::IRepositorioAcuerdos& acuerdos,
+                                 persistencia::IRepositorioAlcances& alcances,
+                                 persistencia::IRepositorioProyectos& proyectos)
     : cotizaciones_(cotizaciones),
       acuerdos_(acuerdos),
       alcances_(alcances),
@@ -261,6 +263,71 @@ void ServicioAcuerdo::reportarAvance(int idAcuerdo, int porcentaje) {
 void ServicioAcuerdo::pagarHito(int idAcuerdo, int numeroHito, const std::string& comprobante,
                                 long long montoPagado) {
     exigirAcuerdo(idAcuerdo).pagarHito(numeroHito, comprobante, montoPagado);
+}
+
+// ===========================================================================
+// ServicioAvance - UC5 y US-06
+// ===========================================================================
+
+ServicioAvance::ServicioAvance(persistencia::IRepositorioAcuerdos& acuerdos,
+                               persistencia::IRepositorioReportes& reportes,
+                               persistencia::PuertoNotificacion& notificador,
+                               double umbralPorcentual)
+    : acuerdos_(acuerdos),
+      reportes_(reportes),
+      notificador_(notificador),
+      umbral_(umbralPorcentual) {}
+
+double ServicioAvance::umbral() const { return umbral_; }
+
+std::vector<const dominio::ReporteAvance*> ServicioAvance::historial(int idAcuerdo) const {
+    return reportes_.listarPorAcuerdo(idAcuerdo);
+}
+
+int ServicioAvance::registrarAvance(int idAcuerdo, int avanceGeneral,
+                                    long long costoRealAcumulado) {
+    dominio::AcuerdoFormal* acuerdo = acuerdos_.buscar(idAcuerdo);
+    if (acuerdo == nullptr) {
+        throw ReglaDeNegocio("No existe el acuerdo " + std::to_string(idAcuerdo));
+    }
+    // Precondicion del UC5: el acuerdo debe estar vigente
+    if (acuerdo->liquidado()) {
+        throw ReglaDeNegocio("El acuerdo ya esta liquidado: la obra se cerro");
+    }
+
+    // UC5 E1: el avance general no puede ser menor o igual al ultimo reportado
+    const int vigente = acuerdo->avanceReportado();
+    if (avanceGeneral <= vigente) {
+        throw ReglaDeNegocio("El avance reportado debe superar el vigente, que es " +
+                             std::to_string(vigente) + "%");
+    }
+
+    // Figura 6, mensajes 6 y 7: se crea el reporte y se le pide su propia desviacion
+    dominio::ReporteAvance reporte(reportes_.siguienteId(), idAcuerdo, avanceGeneral,
+                                   costoRealAcumulado);
+    reporte.calcularDesviacion(acuerdo->costoEsperadoPara(avanceGeneral));
+    const int idReporte = reportes_.guardar(reporte);
+
+    // El avance de obra habilita los hitos que ya cumplen su exigencia (enlace con UC8)
+    acuerdo->registrarAvance(avanceGeneral);
+
+    std::ostringstream detalle;
+    detalle << std::fixed << std::setprecision(1);
+    detalle << "Avance " << avanceGeneral << "%. Costo real $" << reporte.costoRealAcumulado()
+            << " frente a $" << reporte.costoEsperado() << " esperado. Desviacion $"
+            << reporte.desviacionCosto() << " (" << reporte.desviacionPorcentual()
+            << "%), umbral " << umbral_ << "%.";
+
+    // Figura 6, mensaje 11 y fragmento opt: el servicio decide, el puerto envia
+    const std::string asunto = "Acuerdo " + std::to_string(idAcuerdo);
+    if (reporte.requiereAlerta(umbral_)) {
+        notificador_.enviarAlerta("Coordinador de Obra", "Sobrecosto en el " + asunto,
+                                  detalle.str());
+    } else {
+        notificador_.enviarConfirmacion("Coordinador de Obra", "Avance registrado en el " + asunto,
+                                        detalle.str());
+    }
+    return idReporte;
 }
 
 }  // namespace control
